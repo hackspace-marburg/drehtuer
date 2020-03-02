@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+	"os"
+	"os/signal"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -36,28 +37,21 @@ func handleDoorMessage(_ mqtt.Client, msg mqtt.Message) {
 	}
 }
 
+// waitSigint blocks the current thread until a SIGINT appears.
+func waitSigint() {
+	signalSyn := make(chan os.Signal)
+
+	signal.Notify(signalSyn, os.Interrupt)
+	<-signalSyn
+
+	log.Info("Received SIGINT, closing down..")
+}
+
 func main() {
 	setupMqttLogger()
+	setupMqtt()
 
-	mqttOpts := mqtt.NewClientOptions().
-		AddBroker("tcp://b2s.hsmr.cc:1883").
-		SetClientID("drehtuer").
-		SetKeepAlive(5 * time.Second)
+	waitSigint()
 
-	mqttClient := mqtt.NewClient(mqttOpts)
-	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
-		log.Fatal(token.Error())
-	}
-
-	if token := mqttClient.Subscribe("door", 0, handleDoorMessage); token.Wait() && token.Error() != nil {
-		log.Fatal(token.Error())
-	}
-
-	time.Sleep(10 * time.Second)
-
-	if token := mqttClient.Unsubscribe("door"); token.Wait() && token.Error() != nil {
-		log.Fatal(token.Error())
-	}
-
-	mqttClient.Disconnect(1000)
+	teardownMqtt()
 }
