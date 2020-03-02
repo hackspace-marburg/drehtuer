@@ -7,12 +7,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var mqttBroker string
 var mqttClient mqtt.Client
 
 // setupMqtt starts the MQTT client and subscribes for door.
 func setupMqtt() {
 	mqttOpts := mqtt.NewClientOptions().
-		AddBroker("tcp://b2s.hsmr.cc:1883").
+		AddBroker(mqttBroker).
 		SetClientID("drehtuer").
 		SetKeepAlive(5 * time.Second)
 
