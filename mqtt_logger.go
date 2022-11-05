@@ -12,11 +12,11 @@ type mqttLogger struct {
 }
 
 func (l *mqttLogger) Println(v ...interface{}) {
-	l.ln(v)
+	l.ln("MQTT:", v)
 }
 
 func (l *mqttLogger) Printf(format string, v ...interface{}) {
-	l.f(format, v)
+	l.f("MQTT: "+format, v)
 }
 
 // newLogger creates a new mqttLogger, wrapping the two required methods.
