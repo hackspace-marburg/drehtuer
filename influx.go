@@ -3,14 +3,21 @@ package main
 import (
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	_ "github.com/influxdata/influxdb1-client"
 	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
 var influxAddr string
 
-// Publish this DoorState to the InfluxDB.
-func (doorState DoorState) Publish() error {
+// PublishInflux this DoorState to the InfluxDB.
+func (doorState DoorState) PublishInflux() error {
+	if influxAddr == "" {
+		log.Debug("Skipping publishing InfluxDB as not configured")
+		return nil
+	}
+
 	client, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr: influxAddr,
 	})

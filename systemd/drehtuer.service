@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/conf.d/drehtuer.conf
-ExecStart=/usr/bin/drehtuer -influx ${influx} -mqtt ${mqtt}
+ExecStart=/usr/bin/drehtuer -influx ${influx} -mqtt ${mqtt} -prometheus ${prometheus}
 RestartSec=5
 Restart=on-failure
 DynamicUser=true

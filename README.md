@@ -1,8 +1,7 @@
 # drehtuer
 
-Connects the [door's status](https://hsmr.cc/Infrastruktur/Door), received via
-MQTT, with an InfluxDB. The result can be viewed in the
-[Grafana](https://grafana.hsmr.cc/dashboard/db/door-state), for example.
+Connects the [door's status](https://hsmr.cc/Infrastruktur/Door), received via MQTT, with either an InfluxDB or Prometheus.
+The result can be viewed in the [Grafana](https://grafana.hsmr.cc/dashboard/db/door-state), for example.
 
 
 ## Installation

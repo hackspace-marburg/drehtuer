@@ -37,15 +37,18 @@ func handleDoorMessage(_ mqtt.Client, msg mqtt.Message) {
 	} else {
 		log.WithField("door", doorState).Info("Received MQTT door state")
 
-		if err := doorState.Publish(); err != nil {
-			log.WithError(err).Error("Publishing to InfluxDB errored")
+		if err := doorState.PublishInflux(); err != nil {
+			log.WithError(err).Error("Publishing to InfluxDB failed")
+		}
+		if err := doorState.UpdatePromMetrics(); err != nil {
+			log.WithError(err).Error("Updating Prometheus failed")
 		}
 	}
 }
 
 // waitSigint blocks the current thread until a SIGINT appears.
 func waitSigint() {
-	signalSyn := make(chan os.Signal)
+	signalSyn := make(chan os.Signal, 1)
 
 	signal.Notify(signalSyn, os.Interrupt)
 	<-signalSyn
@@ -57,7 +60,8 @@ func init() {
 	var debugFlag bool
 
 	flag.BoolVar(&debugFlag, "verbose", false, "Verbose logging output")
-	flag.StringVar(&influxAddr, "influx", "", "InfluxDB address")
+	flag.StringVar(&influxAddr, "influx", "", "InfluxDB address, optional")
+	flag.StringVar(&prometheusListener, "prometheus", "", "Prometheus listening address, optional")
 	flag.StringVar(&mqttBroker, "mqtt", "", "MQTT broker")
 
 	flag.Parse()
@@ -66,7 +70,7 @@ func init() {
 		log.StandardLogger().SetLevel(log.DebugLevel)
 	}
 
-	if influxAddr == "" || mqttBroker == "" {
+	if mqttBroker == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -75,6 +79,7 @@ func init() {
 func main() {
 	setupMqttLogger()
 	setupMqtt()
+	setupPrometheus()
 
 	waitSigint()
 
